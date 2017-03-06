@@ -15,27 +15,6 @@ UOpenDoor::UOpenDoor()
 	// ...
 }
 
-
-void UOpenDoor::OpenDoor()
-{
-	if(IsDoorOpen == false)
-	{
-		IsDoorOpen = true;
-		FRotator newRotation = Owner->GetActorRotation() + FRotator(0.0f, OpenAngle, 0.0f);
-		Owner->SetActorRotation(newRotation);
-	}
-}
-
-void UOpenDoor::CloseDoor()
-{
-	if(IsDoorOpen)
-	{
-		IsDoorOpen = false;
-		FRotator newRotation = Owner->GetActorRotation() + FRotator(0.0f, -OpenAngle, 0.0f);
-		Owner->SetActorRotation(newRotation);
-	}
-}
-
 // Called when the game starts
 void UOpenDoor::BeginPlay()
 {
@@ -77,13 +56,11 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if(GetTotalMassOfActorsOnPlate() >= PressurePlateTriggerMass)
 	{
-		OpenDoor();
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
-	}
-
-	if(GetWorld()->GetTimeSeconds() - LastDoorOpenTime >= DoorCloseDelay)
+		OnOpen.Broadcast();
+	} 
+	else
 	{
-		CloseDoor();
+		OnClose.Broadcast();
 	}
 
 	// ...
