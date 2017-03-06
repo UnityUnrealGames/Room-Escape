@@ -1,5 +1,6 @@
 # only for this
-Content/StarterContent/*
+Content/StarterContent/Textures
+Content/StartedContent/HDRI
 
 # Visual Studio 2015 user specific files
 .vs/
