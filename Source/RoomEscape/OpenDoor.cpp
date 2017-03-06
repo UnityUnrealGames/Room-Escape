@@ -3,6 +3,7 @@
 #include "RoomEscape.h"
 #include "OpenDoor.h"
 
+#define OUT
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
@@ -35,23 +36,46 @@ void UOpenDoor::CloseDoor()
 	}
 }
 
-
 // Called when the game starts
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	TriggerActor = GetWorld()->GetFirstPlayerController()->GetPawn();
 	Owner = GetOwner();
+
+	if(!PressurePlate)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Pressure plate not assigned in %s"), *Owner->GetName());
+	}
 	// ...
 	
 }
 
+float UOpenDoor::GetTotalMassOfActorsOnPlate()
+{
+	float TotalMass = 0.f;
+
+	if(!PressurePlate)
+	{
+		return -1;
+	}
+
+	// Find all the overlapping actors
+	TArray<AActor*> OveralappingActors;
+	PressurePlate->GetOverlappingActors(OUT OveralappingActors);
+
+	for(auto& actor : OveralappingActors)
+	{
+		TotalMass += actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+	}
+
+	return TotalMass;
+}
 
 // Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(PressurePlate->IsOverlappingActor(TriggerActor))
+	if(GetTotalMassOfActorsOnPlate() >= PressurePlateTriggerMass)
 	{
 		OpenDoor();
 		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
@@ -64,4 +88,5 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 	// ...
 }
+
 
